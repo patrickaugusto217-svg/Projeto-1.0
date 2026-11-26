@@ -1,0 +1,835 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz das Tartarugas Ninja - Missão Nova York</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Bangers (estilo HQ/Ação) e Chakra Petch / Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================================
+           ESTILOS TEMÁTICOS: ESGOTOS DE NOVA YORK & ARTE HQ / URBANA
+           ========================================================= */
+        :root {
+            --turtle-green: #4ADE80;
+            --ooze-green: #84CC16;
+            --sewer-dark: #0F1712;
+            --brick-dark: #18231C;
+            --leo-blue: #3B82F6;
+            --raph-red: #EF4444;
+            --donnie-purple: #A855F7;
+            --mikey-orange: #F97316;
+            --pizza-yellow: #FACC15;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #0D1410;
+            /* Padrão estilizado de parede de tijolos escuros dos esgotos de NY + brilho neon mutageno */
+            background-image: 
+                radial-gradient(circle at 50% 15%, rgba(132, 204, 22, 0.16) 0%, transparent 55%),
+                radial-gradient(circle at 15% 85%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.12) 0%, transparent 45%),
+                linear-gradient(335deg, rgba(255,255,255,0.03) 23px, transparent 23px),
+                linear-gradient(155deg, rgba(255,255,255,0.03) 23px, transparent 23px),
+                linear-gradient(335deg, rgba(255,255,255,0.025) 23px, transparent 23px),
+                linear-gradient(155deg, rgba(255,255,255,0.025) 23px, transparent 23px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 58px 58px, 58px 58px, 58px 58px, 58px 58px;
+            background-position: 0 0, 0 0, 0 0, 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Tipografia estilo Quadrinhos / Ação */
+        .comic-font {
+            font-family: 'Bangers', cursive, sans-serif;
+            letter-spacing: 0.06em;
+        }
+
+        /* Brilho de mutagênico / Ooze no fundo */
+        .ooze-glow {
+            box-shadow: 0 0 25px rgba(132, 204, 22, 0.35), inset 0 0 15px rgba(132, 204, 22, 0.15);
+        }
+
+        /* Painel estilo Quadrinhos (HQ) com borda preta grossa e sombra sólida */
+        .comic-panel {
+            border: 4px solid #090D0B;
+            box-shadow: 8px 8px 0px #090D0B, 0 0 30px rgba(132, 204, 22, 0.18);
+        }
+
+        /* Botão estilo HQ interativo */
+        .btn-comic {
+            border: 3px solid #090D0B;
+            box-shadow: 4px 4px 0px #090D0B;
+            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, background-color 0.15s ease;
+        }
+
+        .btn-comic:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #090D0B;
+        }
+
+        .btn-comic:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #090D0B;
+        }
+
+        /* Padrão de retícula Halftone típico de HQs */
+        .halftone-bg {
+            background-image: radial-gradient(rgba(9, 13, 11, 0.18) 1.5px, transparent 1.5px);
+            background-size: 10px 10px;
+        }
+
+        /* Partículas flutuantes de mutagênico / vapor de bueiro */
+        .ooze-particle {
+            position: fixed;
+            bottom: -40px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #BEF264, #65A30D);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.45;
+            }
+            80% {
+                opacity: 0.35;
+            }
+            100% {
+                transform: translateY(-110vh) scale(0.6);
+                opacity: 0;
+            }
+        }
+
+        /* Animação de entrada estilo quadro de HQ */
+        @keyframes comicPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.93) translateY(14px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .animate-comic-pop {
+            animation: comicPop 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Rotação lenta para tampa de bueiro decorativa no fundo */
+        @keyframes slowSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spin-slow {
+            animation: slowSpin 45s linear infinite;
+        }
+
+        /* Faixa com as 4 cores das máscaras */
+        .turtle-stripes {
+            background: linear-gradient(
+                90deg,
+                #3B82F6 0%, #3B82F6 25%,
+                #EF4444 25%, #EF4444 50%,
+                #A855F7 50%, #A855F7 75%,
+                #F97316 75%, #F97316 100%
+            );
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4 sm:p-6 text-slate-100 select-none">
+
+    <!-- Partículas de mutagênico no fundo -->
+    <div id="ooze-container" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+    <!-- Decoração de fundo: Tampa de Bueiro gigante sutil -->
+    <div class="fixed -bottom-28 -left-28 w-72 h-72 sm:w-96 sm:h-96 opacity-10 pointer-events-none z-0 spin-slow">
+        <svg viewBox="0 0 200 200" class="w-full h-full">
+            <circle cx="100" cy="100" r="95" fill="#334155" stroke="#84CC16" stroke-width="6"/>
+            <circle cx="100" cy="100" r="78" fill="none" stroke="#94A3B8" stroke-width="4" stroke-dasharray="12 8"/>
+            <circle cx="100" cy="100" r="55" fill="none" stroke="#94A3B8" stroke-width="3"/>
+            <line x1="100" y1="10" x2="100" y2="190" stroke="#94A3B8" stroke-width="4"/>
+            <line x1="10" y1="100" x2="190" y2="100" stroke="#94A3B8" stroke-width="4"/>
+            <line x1="36" y1="36" x2="164" y2="164" stroke="#94A3B8" stroke-width="3"/>
+            <line x1="164" y1="36" x2="36" y2="164" stroke="#94A3B8" stroke-width="3"/>
+        </svg>
+    </div>
+
+    <!-- Botão de Som (Web Audio API) no canto superior direito -->
+    <button id="sound-btn" onclick="toggleSound()" title="Ativar/Desativar Som"
+        class="fixed top-4 right-4 z-30 bg-lime-400 hover:bg-lime-300 text-slate-950 px-3.5 py-2.5 rounded-xl btn-comic flex items-center gap-2 font-extrabold text-sm cursor-pointer">
+        <span id="sound-icon" class="text-lg leading-none">🔊</span>
+        <span id="sound-label" class="hidden sm:inline">SOM ON</span>
+    </button>
+
+    <!-- Container Principal -->
+    <main class="relative z-10 w-full max-w-2xl my-auto">
+
+        <!-- =========================================================
+             1. TELA INICIAL
+             ========================================================= -->
+        <section id="start-screen" class="comic-panel bg-slate-900 rounded-2xl overflow-hidden animate-comic-pop">
+            <!-- Faixa superior com as 4 cores das máscaras -->
+            <div class="h-3.5 w-full turtle-stripes border-b-4 border-slate-950"></div>
+
+            <!-- Cabeçalho estilo Capa de HQ -->
+            <div class="bg-gradient-to-b from-lime-500 to-green-600 halftone-bg p-6 sm:p-8 text-center border-b-4 border-slate-950 relative">
+                <div class="inline-block bg-slate-950 text-yellow-400 comic-font text-sm sm:text-base px-4 py-1 rounded-full border-2 border-yellow-400 mb-3 shadow">
+                    🍕 EDIÇÃO ESPECIAL • ESGOTOS DE NOVA YORK 🗽
+                </div>
+
+                <!-- Ilustração SVG Temática: Tampa de Bueiro + As 4 Máscaras Ninja -->
+                <div class="w-40 h-32 sm:w-48 sm:h-36 mx-auto my-2 drop-shadow-[0_6px_0_rgba(9,13,11,0.85)]">
+                    <svg viewBox="0 0 240 170" class="w-full h-full">
+                        <!-- Tampa de Bueiro de Fundo -->
+                        <circle cx="120" cy="85" r="74" fill="#334155" stroke="#090D0B" stroke-width="5"/>
+                        <circle cx="120" cy="85" r="60" fill="#1E293B" stroke="#64748B" stroke-width="3" stroke-dasharray="10 6"/>
+                        <text x="120" y="38" text-anchor="middle" fill="#94A3B8" font-family="Bangers, sans-serif" font-size="14" letter-spacing="2">NYC SEWER</text>
+                        <text x="120" y="142" text-anchor="middle" fill="#84CC16" font-family="Bangers, sans-serif" font-size="13" letter-spacing="2">TMNT HQ</text>
+
+                        <!-- Máscara 1: Leonardo (Azul) -->
+                        <g transform="translate(32, 46) rotate(-8)">
+                            <path d="M5,12 Q40,4 75,12 L72,28 Q40,22 8,28 Z" fill="#3B82F6" stroke="#090D0B" stroke-width="3.5"/>
+                            <ellipse cx="26" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <ellipse cx="54" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <!-- Nó da faixa -->
+                            <path d="M74,16 L88,10 L84,20 L90,27 L73,24 Z" fill="#2563EB" stroke="#090D0B" stroke-width="3"/>
+                        </g>
+
+                        <!-- Máscara 2: Raphael (Vermelho) -->
+                        <g transform="translate(126, 44) rotate(8)">
+                            <path d="M5,12 Q40,4 75,12 L72,28 Q40,22 8,28 Z" fill="#EF4444" stroke="#090D0B" stroke-width="3.5"/>
+                            <ellipse cx="26" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <ellipse cx="54" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <path d="M6,16 L-8,10 L-4,20 L-10,27 L7,24 Z" fill="#DC2626" stroke="#090D0B" stroke-width="3"/>
+                        </g>
+
+                        <!-- Máscara 3: Donatello (Roxo) -->
+                        <g transform="translate(32, 92) rotate(5)">
+                            <path d="M5,12 Q40,4 75,12 L72,28 Q40,22 8,28 Z" fill="#A855F7" stroke="#090D0B" stroke-width="3.5"/>
+                            <ellipse cx="26" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <ellipse cx="54" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <path d="M74,16 L88,10 L84,20 L90,27 L73,24 Z" fill="#9333EA" stroke="#090D0B" stroke-width="3"/>
+                        </g>
+
+                        <!-- Máscara 4: Michelangelo (Laranja) -->
+                        <g transform="translate(126, 92) rotate(-5)">
+                            <path d="M5,12 Q40,4 75,12 L72,28 Q40,22 8,28 Z" fill="#F97316" stroke="#090D0B" stroke-width="3.5"/>
+                            <ellipse cx="26" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <ellipse cx="54" cy="18" rx="8" ry="4.5" fill="#FFFFFF" stroke="#090D0B" stroke-width="2.5"/>
+                            <path d="M6,16 L-8,10 L-4,20 L-10,27 L7,24 Z" fill="#EA580C" stroke="#090D0B" stroke-width="3"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <h1 class="comic-font text-4xl sm:text-6xl text-slate-950 drop-shadow-[2px_2px_0px_#FEF08A] leading-none mt-1">
+                    Quiz das Tartarugas Ninja
+                </h1>
+            </div>
+
+            <!-- Corpo da Tela Inicial -->
+            <div class="p-6 sm:p-8 text-center bg-slate-900">
+                <p class="text-slate-200 text-base sm:text-lg font-bold leading-relaxed mb-6">
+                    Saia das sombras dos esgotos de Nova York e prove ao <span class="text-lime-400 font-extrabold">Mestre Splinter</span> que você domina tudo sobre Leonardo, Raphael, Donatello, Michelangelo, pizzas e os planos malignos do Destruidor!
+                </p>
+
+                <!-- Badges das 4 Tartarugas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-7 text-xs sm:text-sm font-black">
+                    <div class="bg-blue-600/20 border-2 border-blue-500 text-blue-300 py-1.5 px-2 rounded-xl">
+                        ⚔️ LEONARDO
+                    </div>
+                    <div class="bg-red-600/20 border-2 border-red-500 text-red-300 py-1.5 px-2 rounded-xl">
+                        🔱 RAPHAEL
+                    </div>
+                    <div class="bg-purple-600/20 border-2 border-purple-500 text-purple-300 py-1.5 px-2 rounded-xl">
+                        🥢 DONATELLO
+                    </div>
+                    <div class="bg-orange-600/20 border-2 border-orange-500 text-orange-300 py-1.5 px-2 rounded-xl">
+                        ⛓️ MICHELANGELO
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()"
+                    class="w-full sm:w-auto px-10 py-4 bg-yellow-400 hover:bg-yellow-300 text-slate-950 comic-font text-2xl sm:text-3xl rounded-2xl btn-comic cursor-pointer inline-flex items-center justify-center gap-3">
+                    <span>COWABUNGA! COMEÇAR MISSÃO</span>
+                    <span>🍕</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             2. TELA DE PERGUNTAS
+             ========================================================= -->
+        <section id="quiz-screen" class="hidden comic-panel bg-slate-900 rounded-2xl overflow-hidden">
+            <!-- Faixa superior temática que muda de cor conforme a pergunta -->
+            <div id="question-accent-bar" class="h-3.5 w-full bg-blue-500 border-b-4 border-slate-950 transition-colors duration-300"></div>
+
+            <!-- Cabeçalho de Status: Contador, Placar e Barra de Progresso -->
+            <div class="bg-slate-800/95 p-4 sm:p-5 border-b-4 border-slate-950">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <span id="question-counter" class="comic-font text-xl sm:text-2xl text-yellow-400 bg-slate-950 px-4 py-1 rounded-xl border-2 border-yellow-400/80">
+                        Pergunta 1 de 5
+                    </span>
+                    <div class="flex items-center gap-2 bg-slate-950 px-4 py-1 rounded-xl border-2 border-lime-400">
+                        <span class="text-base">🍕</span>
+                        <span id="live-score" class="comic-font text-xl text-lime-400">
+                            Pontos: 0
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Barra de progresso estilo tubo de mutagênico -->
+                <div class="w-full h-5 bg-slate-950 rounded-full border-2 border-slate-700 p-0.5 overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-lime-500 to-green-400 rounded-full transition-all duration-500 ease-out" style="width: 20%;"></div>
+                </div>
+            </div>
+
+            <!-- Área da Pergunta e Opções -->
+            <div class="p-5 sm:p-8 bg-slate-900">
+                <!-- Quadro do Enunciado -->
+                <div class="bg-slate-800 border-3 border-slate-950 rounded-2xl p-4 sm:p-5 mb-6 shadow-[4px_4px_0px_#090D0B] flex items-start gap-3.5">
+                    <div id="question-icon" class="text-3xl sm:text-4xl bg-slate-950 p-2.5 rounded-xl border-2 border-lime-400 shrink-0">
+                        🐢
+                    </div>
+                    <h2 id="question-text" class="text-lg sm:text-2xl font-extrabold text-white leading-snug my-auto">
+                        Carregando missão...
+                    </h2>
+                </div>
+
+                <!-- 4 Opções de Resposta -->
+                <div id="options-container" class="grid grid-cols-1 gap-3.5">
+                    <!-- Inseridas dinamicamente via JS -->
+                </div>
+
+                <!-- Caixa de Feedback Imediato -->
+                <div id="feedback-box" class="hidden mt-6 p-4 sm:p-5 rounded-2xl border-3 border-slate-950 shadow-[4px_4px_0px_#090D0B] animate-comic-pop">
+                    <div class="flex items-center gap-2.5 mb-1.5">
+                        <span id="feedback-badge" class="comic-font text-xl sm:text-2xl px-3 py-0.5 rounded-lg border-2 border-slate-950">
+                            COWABUNGA!
+                        </span>
+                        <h3 id="feedback-title" class="font-extrabold text-lg sm:text-xl">
+                            Resposta Correta!
+                        </h3>
+                    </div>
+                    <p id="feedback-curiosity" class="text-sm sm:text-base font-bold leading-relaxed">
+                        Curiosidade ninja aqui.
+                    </p>
+                </div>
+
+                <!-- Botão Avançar -->
+                <div class="mt-6 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()"
+                        class="hidden w-full sm:w-auto px-8 py-3.5 bg-yellow-400 hover:bg-yellow-300 text-slate-950 comic-font text-2xl rounded-xl btn-comic cursor-pointer">
+                        Próxima Pergunta ➡️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             3. TELA FINAL DE RESULTADOS
+             ========================================================= -->
+        <section id="result-screen" class="hidden comic-panel bg-slate-900 rounded-2xl overflow-hidden text-center">
+            <div class="h-3.5 w-full turtle-stripes border-b-4 border-slate-950"></div>
+
+            <!-- Cabeçalho de Vitória / Resultado -->
+            <div class="bg-gradient-to-b from-lime-500 to-green-600 halftone-bg p-6 sm:p-8 border-b-4 border-slate-950">
+                <div id="result-emoji" class="text-6xl sm:text-7xl mb-2 drop-shadow-[0_5px_0_rgba(9,13,11,0.8)]">
+                    🏆
+                </div>
+                <h2 class="comic-font text-3xl sm:text-5xl text-slate-950 drop-shadow-[2px_2px_0px_#FEF08A]">
+                    Missão Concluída!
+                </h2>
+
+                <!-- Placar Final -->
+                <div class="inline-block bg-slate-950 border-3 border-yellow-400 rounded-2xl px-7 py-3 mt-4 shadow-[4px_4px_0px_#090D0B]">
+                    <span class="block text-xs font-extrabold uppercase tracking-widest text-slate-400">
+                        Pontuação Final
+                    </span>
+                    <span id="final-score-text" class="comic-font text-4xl sm:text-5xl text-yellow-400">
+                        5 / 5
+                    </span>
+                </div>
+            </div>
+
+            <!-- Patente Ninja e Resumo -->
+            <div class="p-6 sm:p-8 bg-slate-900">
+                <span class="inline-block bg-lime-400/20 border-2 border-lime-400 text-lime-300 text-xs font-black uppercase tracking-wider px-3.5 py-1 rounded-full mb-2">
+                    Patente Ninja Conquistada
+                </span>
+                <h3 id="rank-title" class="comic-font text-3xl sm:text-4xl text-yellow-400 mb-4">
+                    Mestre Ninja Supremo
+                </h3>
+
+                <div class="bg-slate-800 border-3 border-slate-950 rounded-2xl p-4 sm:p-5 mb-6 text-slate-200 font-bold text-base sm:text-lg leading-relaxed shadow-[4px_4px_0px_#090D0B]">
+                    <p id="rank-summary">Resumo do desempenho ninja.</p>
+                </div>
+
+                <!-- Mini resumo visual dos 5 acertos/erros -->
+                <div id="history-pills" class="flex justify-center gap-2.5 mb-7 flex-wrap">
+                    <!-- Pílulas Q1..Q5 inseridas via JS -->
+                </div>
+
+                <button onclick="restartQuiz()"
+                    class="w-full sm:w-auto px-10 py-4 bg-lime-400 hover:bg-lime-300 text-slate-950 comic-font text-2xl sm:text-3xl rounded-2xl btn-comic cursor-pointer inline-flex items-center justify-center gap-2">
+                    <span>JOGAR NOVAMENTE</span>
+                    <span>🔄</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé Temático -->
+    <footer class="relative z-10 mt-6 text-center text-slate-400 font-bold text-xs sm:text-sm">
+        🐢 Tartarugas Ninja Quiz • Direto do esconderijo nos esgotos de NYC 🍕
+    </footer>
+
+    <script>
+        // =========================================================
+        // BANCO DE 5 PERGUNTAS TEMÁTICAS DAS TARTARUGAS NINJA
+        // =========================================================
+        const quizData = [
+            {
+                icon: "⚔️",
+                accentColor: "bg-blue-500",
+                question: "Qual das Tartarugas Ninja usa a máscara azul, lidera a equipe e luta com duas espadas Katana?",
+                options: [
+                    "Raphael",
+                    "Leonardo",
+                    "Donatello",
+                    "Michelangelo"
+                ],
+                correctIndex: 1,
+                curiosity: "Leonardo (Leo) é o líder disciplinado e estrategista do grupo, nomeado em homenagem ao mestre renascentista Leonardo da Vinci!"
+            },
+            {
+                icon: "🐀",
+                accentColor: "bg-amber-500",
+                question: "Quem é o sábio mestre de artes marciais e pai adotivo que treinou as Tartarugas Ninja nos esgotos?",
+                options: [
+                    "Casey Jones",
+                    "Baxter Stockman",
+                    "Mestre Splinter",
+                    "Krang"
+                ],
+                correctIndex: 2,
+                curiosity: "Mestre Splinter aprendeu ninjutsu com seu antigo mestre Hamato Yoshi e transformou as quatro tartarugas mutantes em verdadeiros guerreiros."
+            },
+            {
+                icon: "🍕",
+                accentColor: "bg-orange-500",
+                question: "Qual é a comida favorita absoluta das Tartarugas Ninja depois de uma patrulha noturna?",
+                options: [
+                    "Hambúrguer duplo",
+                    "Lámen picante",
+                    "Tacos crocantes",
+                    "Pizza"
+                ],
+                correctIndex: 3,
+                curiosity: "Cowabunga! Especialmente Michelangelo, todas as tartarugas são fanáticas por pizza — muitas vezes com coberturas bizarras como anchovas e marshmallow!"
+            },
+            {
+                icon: "🥢",
+                accentColor: "bg-purple-500",
+                question: "Qual é a arma tradicional usada por Donatello, o gênio inventor de máscara roxa?",
+                options: [
+                    "Bastão Bo",
+                    "Par de Sai",
+                    "Nunchakus",
+                    "Kusarigama"
+                ],
+                correctIndex: 0,
+                curiosity: "Donatello combina sua mente brilhante para criar veículos e gadgets com a agilidade impressionante do tradicional bastão de madeira Bo."
+            },
+            {
+                icon: "🪖",
+                accentColor: "bg-red-500",
+                question: "Qual é o nome do arqui-inimigo blindado líder do Clã do Pé que frequentemente se alia ao alienígena Krang?",
+                options: [
+                    "Bebop",
+                    "Destruidor (Shredder)",
+                    "Rocksteady",
+                    "Cabeça de Couro"
+                ],
+                correctIndex: 1,
+                curiosity: "O Destruidor (Oroku Saki) é o temido líder do Clã do Pé e rival histórico do Mestre Splinter, famoso por sua armadura coberta de lâminas."
+            }
+        ];
+
+        // =========================================================
+        // ESTADO DO QUIZ
+        // =========================================================
+        let currentIndex = 0;
+        let score = 0;
+        let answered = false;
+        let answerHistory = [];
+        let isMuted = false;
+        let audioCtx = null;
+
+        // =========================================================
+        // EFEITOS SONOROS SINTETIZADOS VIA WEB AUDIO API
+        // =========================================================
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                // Clique seco estilo katana/ação
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(520, now);
+                osc.frequency.exponentialRampToValueAtTime(180, now + 0.08);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'correct') {
+                // Fanfarra vibrante "Cowabunga!"
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // Dó, Mi, Sol, Dó agudo
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.075);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.075);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.075 + 0.22);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.075);
+                    osc.stop(now + idx * 0.075 + 0.22);
+                });
+            } else if (type === 'wrong') {
+                // Som grave de alerta/erro
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.32);
+                gain.gain.setValueAtTime(0.16, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.32);
+            } else if (type === 'victory') {
+                // Melodia heroica de conclusão
+                const melody = [
+                    { f: 440, t: 0, d: 0.12 },
+                    { f: 554.37, t: 0.12, d: 0.12 },
+                    { f: 659.25, t: 0.24, d: 0.12 },
+                    { f: 880, t: 0.38, d: 0.35 }
+                ];
+                melody.forEach(n => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(n.f, now + n.t);
+                    gain.gain.setValueAtTime(0.2, now + n.t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d);
+                });
+            }
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('sound-icon');
+            const label = document.getElementById('sound-label');
+            const btn = document.getElementById('sound-btn');
+
+            if (isMuted) {
+                icon.textContent = '🔇';
+                label.textContent = 'MUDO';
+                btn.classList.remove('bg-lime-400', 'hover:bg-lime-300');
+                btn.classList.add('bg-slate-400', 'hover:bg-slate-300');
+            } else {
+                icon.textContent = '🔊';
+                label.textContent = 'SOM ON';
+                btn.classList.remove('bg-slate-400', 'hover:bg-slate-300');
+                btn.classList.add('bg-lime-400', 'hover:bg-lime-300');
+                playSound('click');
+            }
+        }
+
+        // =========================================================
+        // PARTÍCULAS DE MUTAGÊNICO (OOZE) NO FUNDO
+        // =========================================================
+        function spawnOozeParticles() {
+            const container = document.getElementById('ooze-container');
+            for (let i = 0; i < 16; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'ooze-particle';
+                const size = Math.random() * 14 + 6;
+                dot.style.width = `${size}px`;
+                dot.style.height = `${size}px`;
+                dot.style.left = `${Math.random() * 100}%`;
+                dot.style.animationDuration = `${Math.random() * 10 + 8}s`;
+                dot.style.animationDelay = `${Math.random() * 8}s`;
+                container.appendChild(dot);
+            }
+        }
+
+        // =========================================================
+        // NAVEGAÇÃO E LÓGICA DO QUIZ
+        // =========================================================
+        function startQuiz() {
+            playSound('click');
+            currentIndex = 0;
+            score = 0;
+            answerHistory = [];
+            updateScoreUI();
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            const quizScreen = document.getElementById('quiz-screen');
+            quizScreen.classList.remove('hidden');
+            triggerPopAnimation(quizScreen);
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            answered = false;
+            const currentQ = quizData[currentIndex];
+            const total = quizData.length;
+
+            // Atualiza cor temática da barra superior
+            const accentBar = document.getElementById('question-accent-bar');
+            accentBar.className = `h-3.5 w-full ${currentQ.accentColor} border-b-4 border-slate-950 transition-colors duration-300`;
+
+            // Atualiza contador e barra de progresso
+            document.getElementById('question-counter').textContent = `Pergunta ${currentIndex + 1} de ${total}`;
+            const progressPct = ((currentIndex + 1) / total) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPct}%`;
+
+            // Atualiza ícone e enunciado
+            document.getElementById('question-icon').textContent = currentQ.icon;
+            document.getElementById('question-text').textContent = currentQ.question;
+
+            // Esconde feedback e botão próximo
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // Gera os 4 botões estilo HQ
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            const badgeColors = ['bg-blue-500', 'bg-red-500', 'bg-purple-500', 'bg-orange-500'];
+
+            currentQ.options.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'option-btn w-full text-left p-3.5 sm:p-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl btn-comic flex items-center gap-3.5 cursor-pointer font-extrabold text-base sm:text-lg';
+                btn.onclick = () => handleAnswer(idx);
+
+                btn.innerHTML = `
+                    <span class="w-9 h-9 rounded-lg ${badgeColors[idx]} text-slate-950 border-2 border-slate-950 flex items-center justify-center comic-font text-xl shrink-0">
+                        ${letters[idx]}
+                    </span>
+                    <span class="flex-1">${optionText}</span>
+                    <span class="result-marker text-xl hidden"></span>
+                `;
+
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedIndex) {
+            if (answered) return;
+            answered = true;
+
+            const currentQ = quizData[currentIndex];
+            const isCorrect = selectedIndex === currentQ.correctIndex;
+            const buttons = document.querySelectorAll('.option-btn');
+
+            answerHistory.push(isCorrect);
+
+            if (isCorrect) {
+                score++;
+                updateScoreUI();
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            // Destaca a resposta certa em verde e a errada em vermelho
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('bg-slate-800', 'hover:bg-slate-700', 'cursor-pointer', 'text-white');
+                const marker = btn.querySelector('.result-marker');
+
+                if (idx === currentQ.correctIndex) {
+                    btn.classList.add('bg-emerald-500', 'text-slate-950');
+                    marker.textContent = '✅';
+                    marker.classList.remove('hidden');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('bg-rose-500', 'text-slate-950');
+                    marker.textContent = '❌';
+                    marker.classList.remove('hidden');
+                } else {
+                    btn.classList.add('bg-slate-800/50', 'text-slate-400', 'opacity-60');
+                }
+            });
+
+            // Exibe caixa de feedback imediato com curiosidade temática
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackBadge = document.getElementById('feedback-badge');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackCuriosity = document.getElementById('feedback-curiosity');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-950/90', 'bg-rose-950/90', 'text-emerald-100', 'text-rose-100');
+
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-emerald-950/90', 'text-emerald-100');
+                feedbackBadge.textContent = 'COWABUNGA!';
+                feedbackBadge.className = 'comic-font text-xl sm:text-2xl px-3 py-0.5 rounded-lg border-2 border-slate-950 bg-lime-400 text-slate-950';
+                feedbackTitle.textContent = 'Golpe certeiro!';
+            } else {
+                feedbackBox.classList.add('bg-rose-950/90', 'text-rose-100');
+                feedbackBadge.textContent = 'CASCO DURO!';
+                feedbackBadge.className = 'comic-font text-xl sm:text-2xl px-3 py-0.5 rounded-lg border-2 border-slate-950 bg-rose-500 text-white';
+                feedbackTitle.textContent = 'Essa passou raspando!';
+            }
+
+            feedbackCuriosity.textContent = currentQ.curiosity;
+
+            // Libera o botão "Próxima Pergunta"
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.textContent = currentIndex < quizData.length - 1
+                ? 'Próxima Pergunta ➡️'
+                : 'Ver Patente Ninja 🏆';
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentIndex++;
+
+            if (currentIndex < quizData.length) {
+                const quizScreen = document.getElementById('quiz-screen');
+                triggerPopAnimation(quizScreen);
+                renderQuestion();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('live-score').textContent = `Pontos: ${score}`;
+        }
+
+        // =========================================================
+        // TELA FINAL DE RESULTADOS E PATENTE NINJA
+        // =========================================================
+        function showFinalResults() {
+            playSound('victory');
+            document.getElementById('quiz-screen').classList.add('hidden');
+
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.remove('hidden');
+            triggerPopAnimation(resultScreen);
+
+            const total = quizData.length;
+            document.getElementById('final-score-text').textContent = `${score} / ${total}`;
+
+            let emoji = '';
+            let rankTitle = '';
+            let summary = '';
+
+            if (score === 5) {
+                emoji = '🥷👑';
+                rankTitle = 'Mestre Ninja Supremo';
+                summary = 'Perfeito! Você gabaritou todas as missões! O Mestre Splinter está orgulhoso e as Tartarugas reservaram uma pizza gigante inteira só para você!';
+            } else if (score === 4) {
+                emoji = '⚔️🐢';
+                rankTitle = 'Líder Estrategista do Clã';
+                summary = 'Excelente desempenho! Você conhece Nova York como a palma do casco e está pronto para lutar lado a lado com Leonardo e sua equipe.';
+            } else if (score === 3) {
+                emoji = '🍕🛹';
+                rankTitle = 'Guerreiro do Esgoto';
+                summary = 'Mandou bem! Você já domina os fundamentos do ninjutsu e sabe onde encontrar as melhores fatias de pizza da cidade, mas ainda pode treinar mais um pouco.';
+            } else if (score >= 1) {
+                emoji = '🧀🥡';
+                rankTitle = 'Recruta da Pizza';
+                summary = 'Você sobreviveu à patrulha, mas o Clã do Pé deu trabalho! Que tal rever os ensinamentos do Mestre Splinter e tentar novamente?';
+            } else {
+                emoji = '🦾👾';
+                rankTitle = 'Alvo Fácil do Destruidor';
+                summary = 'Oh não! Parece que você caiu em uma armadilha do Krang e do Destruidor! Clique em "Jogar Novamente" para virar esse jogo!';
+            }
+
+            document.getElementById('result-emoji').textContent = emoji;
+            document.getElementById('rank-title').textContent = rankTitle;
+            document.getElementById('rank-summary').textContent = summary;
+
+            // Pílulas de histórico das 5 perguntas
+            const historyContainer = document.getElementById('history-pills');
+            historyContainer.innerHTML = '';
+            answerHistory.forEach((correct, i) => {
+                const pill = document.createElement('span');
+                pill.className = correct
+                    ? 'px-3 py-1 rounded-lg border-2 border-slate-950 bg-emerald-500 text-slate-950 font-black text-xs sm:text-sm'
+                    : 'px-3 py-1 rounded-lg border-2 border-slate-950 bg-rose-500 text-white font-black text-xs sm:text-sm';
+                pill.textContent = `Missão ${i + 1}: ${correct ? '✔' : '✖'}`;
+                historyContainer.appendChild(pill);
+            });
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        function triggerPopAnimation(element) {
+            element.classList.remove('animate-comic-pop');
+            void element.offsetWidth;
+            element.classList.add('animate-comic-pop');
+        }
+
+        // Inicializa partículas temáticas ao carregar
+        window.onload = function () {
+            spawnOozeParticles();
+        };
+    </script>
+</body>
+</html>
+```
